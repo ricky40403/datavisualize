@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>D3 World Map</title>
+	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+	<script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
+	<script src="http://d3js.org/d3.v2.js"></script>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" />
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />	
+  </head>
+ <body>
+	<style>
+	#states path {
+		fill: #ccc;
+		stroke: #fff;
+	}
+
+	</style>
+	<div id="graph"></div>
+	<p>
+	<label for="year">Year :</label>
+	<input type="text" id="year" style="border:0; color:#f6931f; font-weight:bold; " />
+	</p>
+	<div id="slider" style="width: 200px;"></div>
+    <script>
+		$("#slider").slider({
+			value:2015,
+			min: 1971,
+			max: 2015,
+			step: 1,
+			slide: function( event, ui ) {
+				$("#year").val(ui.value);
+				redraw(ui.value.toString());
+			}
+		});
+		$("#year").val($("#slider").slider("value") );
+		var w = 1200;
+		var h = 500;
+		var geolist = new Firebase('https://torrid-inferno-9548.firebaseio.com/');
+		var xy = d3.geo.equirectangular()
+			.scale(150);
+		var path = d3.geo.path()
+			.projection(xy);
+		var svg = d3.select("#graph").insert("svg")
+			.attr("width", w)
+			.attr("height", h);
+		var states = svg.append("g")
+			.attr("id", "states");
+		var circles = svg.append("g")
+			.attr("id", "circles");
+		var labels = svg.append("g")
+			.attr("id", "labels");
+		geolist.on("value",function(snapshot){
+			var data = snapshot.val();
+			states.selectAll("path")
+				.data(data.features)
+			.enter().append("path")
+				.attr("d", path)
+		})		
+						
+		function redraw(year) {};
+    </script>
+  </body>
+</html>
