@@ -18,7 +18,11 @@
 		fill: #F1EEE8;
 		stroke: #C6ACE8;
 	}
-
+	circle {
+		fill: steelblue;
+		fill-opacity: .6;
+		stroke: #fff;
+	}
 	</style>
 	<div id="graph"></div>
 	<p>
@@ -28,9 +32,9 @@
 	<div id="slider" style="width: 200px;"></div>
     <script>
 		$("#slider").slider({
-			value:2015,
+			value:2014,
 			min: 1971,
-			max: 2015,
+			max: 2014,
 			step: 1,
 			slide: function( event, ui ) {
 				$("#year").val(ui.value);
@@ -41,6 +45,7 @@
 		var w = 1000;
 		var h = 500;
 		var geolist = new Firebase('https://torrid-inferno-9548.firebaseio.com/');
+		var stategdp = new Firebase('https://team7project2.firebaseio.com/');
 		var xy = d3.geo.equirectangular()
 			.scale(150);
 		var path = d3.geo.path()
@@ -64,9 +69,38 @@
 						d3.select(this).style("fill","#6C0");})
 					.on("mouseout", function(d) {
 						d3.select(this).style("fill","#F1EEE8");})
-		})		
-						
-		function redraw(year) {};
+		})
+		var scalefactor=1./40000. ;
+		stategdp.on("value",function(gdp){
+			circles.selectAll("circle")
+				.data(gdp.val())
+			.enter()
+			.append("circle")
+				.attr("cx", function(d, i) {return xy([+d.longitude,+d.latitude])[0]; })
+				.attr("cy", function(d, i) { return xy([+d.longitude,+d.latitude])[1]; })
+				.attr("r",  function(d) { return (Math.sqrt(d["2014"]))*scalefactor;  })				
+					.on("click",function(d){
+                d3.select(this).style("fill","#FC0");})
+			labels.selectAll("labels")
+		      .data(gdp.val())
+		    .enter()
+		    .append("text")
+		        .attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
+		        .attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]; })
+		        .attr("dy", "0.5em")
+		        .attr("text-anchor", "middle")
+		        .text(function(d) { return Math.round(d["2014"]/1000000000); });
+		})
+				
+			
+		function redraw(year) {
+			circles.selectAll("circle")
+			.transition()
+				.duration(1000).ease("linear")
+				 .attr("r",  function(d) { return (Math.sqrt(d[year]))*scalefactor; })
+			labels.selectAll("text")
+          		.text(function(d) { return Math.round(d[year]/1000000000); });
+		};
     </script>
   </body>
 </html>
