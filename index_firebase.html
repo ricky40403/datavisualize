@@ -82,7 +82,7 @@
 				.on("mouseout", function(d) {
 					d3.select(this).style("fill","#F1EEE8");})	
 		})
-		var scalefactor=1./40000. ;
+		var scalefactor=1./70000. ;
 		stategdp.on("value",function(gdp){
 			circles.selectAll("circle")
 				.data(gdp.val())
@@ -102,10 +102,17 @@
 		    .append("text")
 		        .attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
 		        .attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]; })
-		        .attr("dy", "0.5em")
+		        .attr("dy", "1em")
 		        .attr("text-anchor", "middle")
-		        .text(function(d) { return Math.round(d["2014"]/1000000000); });
-	
+				.append("tspan")
+					.text(function(d) { return d["Country Code"]})
+					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })		
+					.attr("dy", "1em")
+			labels.selectAll("text")
+				.append("tspan")
+					.text(function(d) { return Math.round(d["2014"]/1000000000); })
+					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
+					.attr("dy", "1em")
 		});
 		
 		function clicked(d){
@@ -175,7 +182,14 @@
 				 .attr("r",  function(d) { return (Math.sqrt(d[year]))*scalefactor; })
 
 			labels.selectAll("text")
-          		.text(function(d) { return Math.round(d[year]/1000000000); });
+					.text(function(d) { return d["Country Code"]})
+					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })		
+					.attr("dy", "1em")
+			labels.selectAll("text")
+				.append("tspan")
+					.text(function(d) { return Math.round(d["2014"]/1000000000); })
+					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
+					.attr("dy", "1em")
 		};
 		
     </script>
