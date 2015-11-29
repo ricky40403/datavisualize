@@ -12,9 +12,9 @@
 		stroke: #C6ACE8;
 	}
 	circle {
-		fill: steelblue;
+		
 		fill-opacity: .6;
-		stroke: #fff;
+		stroke: #000;
 	}
 	</style>
 	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
@@ -66,7 +66,8 @@
 		var states = svg.append("g")
 			.attr("id", "states");
 		var circles = svg.append("g")
-			.attr("id", "circles");
+			.attr("id", "circles")
+			.style("fill","steelblue");
 		var labels = svg.append("g")
 			.attr("id", "labels");
 		var centered;
@@ -80,6 +81,7 @@
 					d3.select(this).style("fill","#6C0");})
 				.on("mouseout", function(d) {
 					d3.select(this).style("fill","#F1EEE8");})	
+				
 				
 			
 		})
@@ -119,28 +121,59 @@
 				//var centered = xy([+d.longitude,+d.latitude]);
 				k = 3;
 				centered = d.longitude;
+				d3.selectAll("circle").style("opacity","0")
+				d3.select(this)
+					.style("opacity","1")
+					.style("fill","transparent")
+					.on("mouseover",function(d){
+                		d3.select(this).style("fill","transparent");})
+					.on("mouseout", function(d){
+						d3.select(this).style("fill","transparent");})
+					labels.transition()
+						.text()				
 			} else {
 				x = q;
 				y = z;
 				k = 1;
 				centered = null;
 				console.log([d.longitude,d.latitude]);
+				d3.selectAll("circle").style("opacity","1")
+				d3.select(this)
+					.style("fill","steelblue")
+					.on("mouseover",function(d){
+                		d3.select(this).style("fill","#FC0");})
+					.on("mouseout", function(d){
+						d3.select(this).style("fill","steelblue");})
+				stategdp.on("value",function(gdp){
+					labels.selectAll("labels")
+						.data(gdp.val())
+					.enter()
+					.append("text")
+							.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
+							.attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]; })
+							.attr("dy", "0.5em")
+							.attr("text-anchor", "middle")
+							.text(function(d) { return Math.round(d["2014"]/1000000000); });
+	
+				});
 			}
-		
 			states.classed("active", centered)
 			circles.classed("active", centered)
 			labels.classed("active", centered)
 			states.transition()
 				.duration(750)
 				.attr("transform", "translate(" + q + "," + z + ")scale(" + k + ")translate(" + -x + "," + -y +  ")")
+				
 			circles.transition()
 				.duration(750)
 				.attr("transform", "translate(" + q + "," + z + ")scale(" + k + ")translate(" + -x + "," + -y +  ")")
-				.style("stroke-width", 1.5 / k + "px");
+				.style("stroke-width", 1.5 / k + "px")
 			labels.transition()
 				.duration(750)
 				.attr("transform", "translate(" + q + "," + z + ")scale(" + k + ")translate(" + -x + "," + -y +  ")")
-		}				
+				
+							
+		}		
 		function redraw(year) {
 			circles.selectAll("circle")
 			.transition()
