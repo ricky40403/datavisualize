@@ -81,9 +81,6 @@
 					d3.select(this).style("fill","#6C0");})
 				.on("mouseout", function(d) {
 					d3.select(this).style("fill","#F1EEE8");})	
-				
-				
-			
 		})
 		var scalefactor=1./40000. ;
 		stategdp.on("value",function(gdp){
@@ -154,7 +151,6 @@
 							.attr("dy", "0.5em")
 							.attr("text-anchor", "middle")
 							.text(function(d) { return Math.round(d["2014"]/1000000000); });
-	
 				});
 			}
 			states.classed("active", centered)
@@ -170,9 +166,7 @@
 				.style("stroke-width", 1.5 / k + "px")
 			labels.transition()
 				.duration(750)
-				.attr("transform", "translate(" + q + "," + z + ")scale(" + k + ")translate(" + -x + "," + -y +  ")")
-				
-							
+				.attr("transform", "translate(" + q + "," + z + ")scale(" + k + ")translate(" + -x + "," + -y +  ")")		
 		}		
 		function redraw(year) {
 			circles.selectAll("circle")
