@@ -157,7 +157,15 @@
 							.attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]; })
 							.attr("dy", "0.5em")
 							.attr("text-anchor", "middle")
-							.text(function(d) { return Math.round(d["2014"]/1000000000); });
+							.append("tspan")
+								.text(function(d) { return d["Country Code"]})
+								.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })		
+								.attr("dy", "1em")
+					labels.selectAll("text")
+						.append("tspan")
+							.text(function(d) { return Math.round(d["2014"]/1000000000); })
+							.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
+							.attr("dy", "1em")
 				});
 			}
 			states.classed("active", centered)
