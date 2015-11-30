@@ -101,7 +101,7 @@
 		    .enter()
 		    .append("text")
 		        .attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
-		        .attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]; })
+		        .attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]-15; })
 		        .attr("dy", "1em")
 		        .attr("text-anchor", "middle")
 				.append("tspan")
