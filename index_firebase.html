@@ -161,7 +161,10 @@
                 		d3.select(this).style("fill","#FC0");})
 					.on("mouseout", function(d){
 						d3.select(this).style("fill","steelblue");})
-				.on("click", clicked);	 
+				.on("click", function(d){
+					clicked(d);
+					redrawbar(d);
+				});	 
 			labels.selectAll("labels")
 		      .data(gdp.val())
 		    .enter()
@@ -211,13 +214,13 @@
 				k = 3;
 				centered = d.longitude;
 				d3.selectAll("circle").style("opacity","0")
-				d3.select(this)
+				d3.select("circle."+d["Country Code"])
 					.style("opacity","1")
 					.style("fill","transparent")
 					.on("mouseover",function(d){
-                		d3.select(this).style("fill","transparent");})
+                		d3.select("circle."+d["Country Code"]).style("fill","transparent");})
 					.on("mouseout", function(d){
-						d3.select(this).style("fill","transparent");})
+						d3.select("circle."+d["Country Code"]).style("fill","transparent");})
 					labels.transition()
 						.text()				
 			} else {
@@ -225,21 +228,21 @@
 				y = z;
 				k = 1;
 				centered = null;
-				console.log([d.longitude,d.latitude]);
+				
 				d3.selectAll("circle").style("opacity","1")
-				d3.select(this)
+				d3.select("circle."+d["Country Code"])
 					.style("fill","steelblue")
 					.on("mouseover",function(d){
-                		d3.select(this).style("fill","#FC0");})
+                		d3.select("circle."+d["Country Code"]).style("fill","#FC0");})
 					.on("mouseout", function(d){
-						d3.select(this).style("fill","steelblue");})
+						d3.select("circle."+d["Country Code"]).style("fill","steelblue");})
 				stategdp.on("value",function(gdp){
 					labels.selectAll("labels")
 						.data(gdp.val())
 					.enter()
 					.append("text")
 							.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
-							.attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]; })
+							.attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]-15; })
 							.attr("dy", "0.5em")
 							.attr("text-anchor", "middle")
 							.append("tspan")
@@ -267,7 +270,11 @@
 			labels.transition()
 				.duration(750)
 				.attr("transform", "translate(" + q + "," + z + ")scale(" + k + ")translate(" + -x + "," + -y +  ")")		
-		}		
+		}
+		function redrawbar(d){
+			//bar =svgbar.attr("width", w).attr("height", d.length*20)
+			console.log(d);
+		}
 		function redraw(year) {
 			circles.selectAll("circle")
 			.transition()
