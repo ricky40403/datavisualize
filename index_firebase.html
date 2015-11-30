@@ -11,8 +11,7 @@
 		fill: #F1EEE8;
 		stroke: #C6ACE8;
 	}
-	circle {
-		
+	circle {		
 		fill-opacity: .6;
 		stroke: #000;
 	}
@@ -136,9 +135,14 @@
 				.data(data.features)
 			.enter().append("path")
 				.attr("d", path)
-				.on("mouseover", tip.show)
-				.on("mouseout", tip.hide)	
-				.on("click",tip.show)
+				.on("mouseover", function(d) {
+						tip.show(d);
+						d3.select(this).style("fill","#6C0");
+				})
+				.on("mouseout",function(d) {
+						tip.hide(d);
+						d3.select(this).style("fill","#F1EEE8");
+				})		
 			states.selectAll("path")
 				.attr("class",function(d) { return d["properties"]["name"]})
 		})
@@ -179,11 +183,17 @@
 					.selectAll("g")
 						.data(gdp.val())
 					.enter().append("g")
-						.attr("transform",function(d, i) { return "translate(0," + i *barHeight + ")"; })
+						.attr("transform",function(d, i) { return "translate(0," + i *barHeight + ")"; })						
 			bar.append("rect")
 				.style("fill",randomColor)
 				.attr("width", function(d) { return Math.round(d["2014"]/50000000000);})
 					.attr("height", barHeight - 1)			
+					.on("mouseover", function(d){
+							circles.select("circle."+d["Country Code"] )
+							.style("fill","#FC0");})
+					.on("mouseout", function(d){
+							circles.select("circle."+d["Country Code"] )
+							.style("fill","steelblue");})
 			bar.append("text")				
 				.attr("x",function(d) { return Math.round(d["2014"]/50000000000)+10;})
 				.attr("y", barHeight / 2)
@@ -198,7 +208,6 @@
 			if (d&&centered!==d.longitude) {
 				x = xy([+d.longitude,+d.latitude])[0];
 				y = xy([+d.longitude,+d.latitude])[1];
-				//var centered = xy([+d.longitude,+d.latitude]);
 				k = 3;
 				centered = d.longitude;
 				d3.selectAll("circle").style("opacity","0")
