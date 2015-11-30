@@ -29,9 +29,9 @@
 	</h2>
 	<h3>
 	expressed in Billion US dollar
-	</h3>
-
+	</h3>	
 	<div id="graph"></div>
+	<div id="bar"></div>
 	<p>
 	<label for="year">Year :</label>
 	<input type="text" id="year" style="border:0; color:#f6931f; font-weight:bold; " />
@@ -51,18 +51,19 @@
 		$("#year").val($("#slider").slider("value") );
 		var w = 1000;
 		var h = 500;
+		var bar;
 		var geolist = new Firebase('https://torrid-inferno-9548.firebaseio.com/');
 		var stategdp = new Firebase('https://team7project2.firebaseio.com/');
-		/*var xy = d3.geo.equirectangular()
-			.scale(150);*/
 		var xy = d3.geo.equirectangular()
 			.scale(150)
 			.translate([w / 2, h / 2]);
 		var path = d3.geo.path()
 			.projection(xy);
-		var svg = d3.select("#graph").insert("svg")
+		var svg = d3.select("#graph").insert("div").insert("svg")
 			.attr("width", w)
-			.attr("height", h);
+			.attr("height", h)	
+		var svgbar = d3.select("#bar").insert("div").insert("svg")
+		var barHeight = 20;	
 		var states = svg.append("g")
 			.attr("id", "states");
 		var circles = svg.append("g")
@@ -71,6 +72,37 @@
 		var labels = svg.append("g")
 			.attr("id", "labels");
 		var centered;
+		var randomColor = (function(){
+			var golden_ratio_conjugate = 0.618033988749895;
+			var h = Math.random();
+			var hslToRgb = function (h, s, l){
+			var r, g, b;
+			if(s == 0){
+				r = g = b = l; // achromatic
+			}
+			else{
+				function hue2rgb(p, q, t){
+					if(t < 0) t += 1;
+					if(t > 1) t -= 1;
+					if(t < 1/6) return p + (q - p) * 6 * t;
+					if(t < 1/2) return q;
+					if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+					return p;
+				}
+				var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+				var p = 2 * l - q;
+				r = hue2rgb(p, q, h + 1/3);
+				g = hue2rgb(p, q, h);
+				b = hue2rgb(p, q, h - 1/3);
+			}
+			return '#'+Math.round(r * 255).toString(16)+Math.round(g * 255).toString(16)+Math.round(b * 255).toString(16);
+			};
+			return function(){
+				h += golden_ratio_conjugate;
+				h %= 1;
+				return hslToRgb(h, 0.5, 0.60);
+			};
+		})();
 		geolist.on("value",function(snapshot){
 			var data = snapshot.val();
 			states.selectAll("path")
@@ -84,6 +116,7 @@
 		})
 		var scalefactor=1./70000. ;
 		stategdp.on("value",function(gdp){
+			var color = randomColor();
 			circles.selectAll("circle")
 				.data(gdp.val())
 			.enter()
@@ -113,7 +146,21 @@
 					.text(function(d) { return Math.round(d["2014"]/1000000000); })
 					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
 					.attr("dy", "1em")
-		});
+			bar =svgbar.attr("width", w).attr("height", gdp.val().length*20)
+					.selectAll("g")
+						.data(gdp.val())
+					.enter().append("g")
+						.attr("transform",function(d, i) { return "translate(0," + i *barHeight + ")"; })
+			bar.append("rect")
+				.style("fill",randomColor)
+				.attr("width", function(d) { return Math.round(d["2014"]/50000000000);})
+					.attr("height", barHeight - 1)			
+			bar.append("text")				
+				.attr("x",function(d) { return Math.round(d["2014"]/50000000000)+10;})
+				.attr("y", barHeight / 2)
+				.attr("dy", ".35em")
+				.text(function(d) { return Math.round(d["2014"]/1000000000)+d["Country Name"]; })
+		})
 		
 		function clicked(d){
 			var x, y, k
@@ -188,16 +235,24 @@
 			.transition()
 				.duration(1000).ease("linear")
 				 .attr("r",  function(d) { return (Math.sqrt(d[year]))*scalefactor; })
-
 			labels.selectAll("text")
 					.text(function(d) { return d["Country Code"]})
 					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })		
 					.attr("dy", "1em")
 			labels.selectAll("text")
 				.append("tspan")
-					.text(function(d) { return Math.round(d["2014"]/1000000000); })
+					.text(function(d) { return Math.round(d[year]/1000000000); })
 					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
 					.attr("dy", "1em")
+			svgbar.selectAll("rect")
+			.transition()
+				.duration(100)
+					.attr("width", function(d) { return Math.round(d[year]/50000000000);})
+			bar.selectAll("text")
+			.transition()
+				.duration(100)
+					.attr("x",function(d) { return Math.round(d[year]/50000000000)+10;})
+					.text(function(d) { return Math.round(d[year]/1000000000)+d["Country Name"]; })
 		};
 		
     </script>
