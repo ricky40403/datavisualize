@@ -39,13 +39,13 @@
 		top: 100%;
 		left: 0;
 	}
-	</style>
-	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+	</style>	
+	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>	
 	<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" />
 	<script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
-	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" />
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>	
   </head>
  <body>
 	<h2>
@@ -165,7 +165,7 @@
 						d3.select(this).style("fill","steelblue");})
 				.on("click", function(d){
 					clicked(d);
-					redrawbar(d);
+					redrawbar(d,$("#slider").slider("value"));
 				});	 
 			labels.selectAll("labels")
 		      .data(gdp.val())
@@ -194,7 +194,7 @@
 			if (d&&centered!==d.longitude) {
 				x = xy([+d.longitude,+d.latitude])[0];
 				y = xy([+d.longitude,+d.latitude])[1];
-				k = 3;
+				k = 2;
 				centered = d.longitude;
 				d3.selectAll("circle").style("visibility","hidden")
 				d3.select("circle."+d["Country Code"])
@@ -234,7 +234,7 @@
 								.attr("dy", "1em")
 					labels.selectAll("text")
 						.append("tspan")
-							.text(function(d) { return Math.round(d["2014"]/1000000000); })
+							.text(function(d) { return Math.round(d[$("#slider").slider("value")]/1000000000); })
 							.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
 							.attr("dy", "1em")
 				});
@@ -262,7 +262,7 @@
 						.attr("transform",function(d, i) { return "translate(0," + i *barHeight + ")"; })						
 			bar.append("rect")
 				.style("fill",randomColor)
-				.attr("width", function(d) { return Math.round(d["2014"]/50000000000);})
+				.attr("width", function(d) { return Math.round(d["2014"]/30000000000);})
 					.attr("height", barHeight - 1)			
 					.on("mouseover", function(d){
 							circles.select("circle."+d["Country Code"] )
@@ -271,12 +271,12 @@
 							circles.select("circle."+d["Country Code"] )
 							.style("fill","steelblue");})
 			bar.append("text")				
-				.attr("x",function(d) { return Math.round(d["2014"]/50000000000)+10;})
+				.attr("x",function(d) { return Math.round(d["2014"]/30000000000)+10;})
 				.attr("y", barHeight / 2)
 				.attr("dy", ".35em")
 				.text(function(d) { return Math.round(d["2014"]/1000000000)+"("+d["Country Name"]+")"; })
 		}
-		function redrawbar(d){
+		function redrawbar(d,year){
 			var range = d["Country Code"];
 				if (d&&centered===d.longitude) {
 				countrygdp.on("value",function(sectiongdp){
@@ -292,7 +292,7 @@
 							.attr("transform",function(d, i) { return "translate(0," + i *barHeight + ")"; })						
 					bar.append("rect")
 						.style("fill",randomColor)
-							.attr("width", function(d) { return Math.round(d["2014"]/50000000000);})
+							.attr("width", function(d) { return Math.round(d[year]/30000000000);})
 							.attr("height", barHeight - 1)
 							.on("mouseover",function(d){
 								states.selectAll("path."+d["Country Name"])
@@ -303,10 +303,10 @@
 									.style("fill","#F1EEE8");
 							})
 					bar.append("text")				
-						.attr("x",function(d) { return Math.round(d["2014"]/50000000000)+10;})
+						.attr("x",function(d) { return Math.round(d[year]/30000000000)+10;})
 						.attr("y", barHeight / 2)
 						.attr("dy", ".35em")
-						.text(function(d) { return Math.round(d["2014"]/1000000000)+"("+d["Country Name"]+")"; })
+						.text(function(d) { return Math.round(d[year]/1000000000)+"("+d["Country Name"]+")"; })
 				});
 			}
 			else{
@@ -334,11 +334,11 @@
 			svgbar.selectAll("rect")
 			.transition()
 				.duration(100)
-					.attr("width", function(d) { return Math.round(d[year]/50000000000);})
+					.attr("width", function(d) { return Math.round(d[year]/30000000000);})
 			svgbar.selectAll("text")
 			.transition()
 				.duration(100)
-					.attr("x",function(d) { return Math.round(d[year]/50000000000)+10;})
+					.attr("x",function(d) { return Math.round(d[year]/30000000000)+10;})
 					.text(function(d) { return Math.round(d[year]/1000000000)+"("+d["Country Name"]+")"; })
 		};
 		
