@@ -45,22 +45,32 @@
 	<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css" />
 	<script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>	
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>	
   </head>
  <body>
 	<h2>
 		World GDP
 	</h2>
 	<h3>
-	expressed in Billion US dollar
+	expressed in Million US dollar
 	</h3>	
-	<div id="graph"></div>
-	<div id="bar"></div>
-	<p>
-	<label for="year">Year :</label>
-	<input type="text" id="year" style="border:0; color:#f6931f; font-weight:bold; " />
-	</p>
-	<div id="slider" style="width: 200px;"></div>
+	<div class="ui buttons">
+	  <button class="btn btn-warning">GDP</button>
+	  <button class="btn btn-danger">Debt</button>
+	</div>
+	<div style="width: 100%; overflow: hidden;">
+		<div style="float: left;">
+			<div id="graph"></div>
+			<p>
+			<label for="year">Year :</label>
+			<input type="text" id="year" style="border:0; color:#f6931f; font-weight:bold; " />
+			</p>
+			<div id="slider" style="width: 200px;"></div>
+		</div>
+		<div id="bar" style="margin-left: 1000px;"></div>
+	</div>
     <script>
 		$("#slider").slider({
 			value:2014,
@@ -148,7 +158,7 @@
 			states.selectAll("path")
 				.attr("class",function(d) { return d["properties"]["name"]})
 		})
-		var scalefactor=1./70000. ;
+		var scalefactor=1./60000. ;
 		stategdp.on("value",function(gdp){
 			var color = randomColor();
 			circles.selectAll("circle")
@@ -165,7 +175,7 @@
 						d3.select(this).style("fill","steelblue");})
 				.on("click", function(d){
 					clicked(d);
-					redrawbar(d,$("#slider").slider("value"));
+					redrawbar(d, $("#slider").slider("value"));
 				});	 
 			labels.selectAll("labels")
 		      .data(gdp.val())
@@ -181,10 +191,10 @@
 					.attr("dy", "1em")
 			labels.selectAll("text")
 				.append("tspan")
-					.text(function(d) { return Math.round(d["2014"]/1000000000); })
+					.text(function(d) { return Math.round(d["2014"]/1000000); })
 					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
 					.attr("dy", "1em")
-			bardraw(gdp.val());
+			bardraw(gdp.val(), $("#slider").slider("value"));
 		})
 		
 		function clicked(d){
@@ -234,7 +244,7 @@
 								.attr("dy", "1em")
 					labels.selectAll("text")
 						.append("tspan")
-							.text(function(d) { return Math.round(d[$("#slider").slider("value")]/1000000000); })
+							.text(function(d) { return Math.round(d[$("#slider").slider("value")]/1000000); })
 							.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
 							.attr("dy", "1em")
 				});
@@ -254,7 +264,7 @@
 				.duration(750)
 				.attr("transform", "translate(" + q + "," + z + ")scale(" + k + ")translate(" + -x + "," + -y +  ")")		
 		}
-		function bardraw(d){
+		function bardraw(d, year){
 			var bar =svgbar.attr("width", w).attr("height", d.length*20)
 					.selectAll("g")
 						.data(d)
@@ -262,7 +272,7 @@
 						.attr("transform",function(d, i) { return "translate(0," + i *barHeight + ")"; })						
 			bar.append("rect")
 				.style("fill",randomColor)
-				.attr("width", function(d) { return Math.round(d["2014"]/30000000000);})
+				.attr("width", function(d) { return Math.round(d[year]/50000000000);})
 					.attr("height", barHeight - 1)			
 					.on("mouseover", function(d){
 							circles.select("circle."+d["Country Code"] )
@@ -271,10 +281,12 @@
 							circles.select("circle."+d["Country Code"] )
 							.style("fill","steelblue");})
 			bar.append("text")				
-				.attr("x",function(d) { return Math.round(d["2014"]/30000000000)+10;})
+				.attr("x",function(d) { return Math.round(d[year]/50000000000)+10;})
 				.attr("y", barHeight / 2)
 				.attr("dy", ".35em")
-				.text(function(d) { return Math.round(d["2014"]/1000000000)+"("+d["Country Name"]+")"; })
+				.text(function(d) { return Math.round(d[year]/1000000)+"("+d["Country Name"]+")"; })
+			bar.transition()
+				.duration(750)
 		}
 		function redrawbar(d,year){
 			var range = d["Country Code"];
@@ -292,7 +304,7 @@
 							.attr("transform",function(d, i) { return "translate(0," + i *barHeight + ")"; })						
 					bar.append("rect")
 						.style("fill",randomColor)
-							.attr("width", function(d) { return Math.round(d[year]/30000000000);})
+							.attr("width", function(d) { return Math.round(d[year]/50000000000);})
 							.attr("height", barHeight - 1)
 							.on("mouseover",function(d){
 								states.selectAll("path."+d["Country Name"])
@@ -303,16 +315,16 @@
 									.style("fill","#F1EEE8");
 							})
 					bar.append("text")				
-						.attr("x",function(d) { return Math.round(d[year]/30000000000)+10;})
+						.attr("x",function(d) { return Math.round(d[year]/50000000000)+10;})
 						.attr("y", barHeight / 2)
 						.attr("dy", ".35em")
-						.text(function(d) { return Math.round(d[year]/1000000000)+"("+d["Country Name"]+")"; })
+						.text(function(d) { return Math.round(d[year]/1000000)+"("+d["Country Name"]+")"; })
 				});
 			}
 			else{
 				svgbar.selectAll("g").remove();
 				stategdp.on("value",function(gdp){
-					bardraw(gdp.val());
+					bardraw(gdp.val(), $("#slider").slider("value"));
 				});
 			}
 			
@@ -328,18 +340,18 @@
 					.attr("dy", "1em")
 			labels.selectAll("text")
 				.append("tspan")
-					.text(function(d) { return Math.round(d[year]/1000000000); })
+					.text(function(d) { return Math.round(d[year]/1000000); })
 					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
 					.attr("dy", "1em")
 			svgbar.selectAll("rect")
 			.transition()
 				.duration(100)
-					.attr("width", function(d) { return Math.round(d[year]/30000000000);})
+					.attr("width", function(d) { return Math.round(d[year]/50000000000);})
 			svgbar.selectAll("text")
 			.transition()
 				.duration(100)
-					.attr("x",function(d) { return Math.round(d[year]/30000000000)+10;})
-					.text(function(d) { return Math.round(d[year]/1000000000)+"("+d["Country Name"]+")"; })
+					.attr("x",function(d) { return Math.round(d[year]/50000000000)+10;})
+					.text(function(d) { return Math.round(d[year]/1000000)+"("+d["Country Name"]+")"; })
 		};
 		
     </script>
