@@ -39,6 +39,16 @@
 		top: 100%;
 		left: 0;
 	}
+	tspan {
+	    -webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		-o-user-select: none;
+		user-select: none;
+		color:red;
+	}
 	</style>	
 	<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>	
 	<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
@@ -51,16 +61,16 @@
   </head>
  <body>
 	<h2>
-		World GDP
+		World GDP and Debt
 	</h2>
 	<h3>
 	expressed in Million US dollar
 	</h3>	
 	<div class="ui buttons">
-	  <button class="btn btn-warning">GDP</button>
-	  <button class="btn btn-danger">Debt</button>
+	  <button id="gdp" class="btn btn-warning" onclick="GDP()">GDP</button>
+	  <button id="debt" class="btn btn-danger" onclick="DEBT()">Debt</button>
 	</div>
-	<div style="width: 100%; overflow: hidden;">
+	<div style="width: 100%; ">
 		<div style="float: left;">
 			<div id="graph"></div>
 			<p>
@@ -69,13 +79,13 @@
 			</p>
 			<div id="slider" style="width: 200px;"></div>
 		</div>
-		<div id="bar" style="margin-left: 1000px;"></div>
+		<div id="bar" style="margin-left: 950px;"></div>
 	</div>
     <script>
 		$("#slider").slider({
-			value:2014,
-			min: 1968,
-			max: 2014,
+			value:2013,
+			min: 1973,
+			max: 2013,
 			step: 1,
 			slide: function( event, ui ) {
 				$("#year").val(ui.value);
@@ -83,13 +93,14 @@
 			}
 		});
 		$("#year").val($("#slider").slider("value") );
-		var w = 1000;
+		var w = 950;
 		var h = 500;
 		//var bar;
 		var tip = d3.tip().attr('class', 'd3-tip').html(function(d) { return d["properties"]["name"] });
 		var geolist = new Firebase('https://torrid-inferno-9548.firebaseio.com/');
 		var stategdp = new Firebase('https://team7project2.firebaseio.com/');
 		var countrygdp = new Firebase('https://stategdp.firebaseio.com/');
+		var scalefactor=1./60000. ;
 		var xy = d3.geo.equirectangular()
 			.scale(150)
 			.translate([w / 2, h / 2]);
@@ -140,7 +151,13 @@
 				return hslToRgb(h, 0.5, 0.60);
 			};
 		})();
-		geolist.on("value",function(snapshot){
+		
+		GDP();
+
+		function GDP(){
+			document.getElementById("gdp").disabled = true;
+			document.getElementById("debt").disabled = false;
+			geolist.on("value",function(snapshot){
 			var data = snapshot.val();
 			states.selectAll("path")
 				.data(data.features)
@@ -158,7 +175,7 @@
 			states.selectAll("path")
 				.attr("class",function(d) { return d["properties"]["name"]})
 		})
-		var scalefactor=1./60000. ;
+		
 		stategdp.on("value",function(gdp){
 			var color = randomColor();
 			circles.selectAll("circle")
@@ -168,7 +185,7 @@
 				.attr("class",function(d) { return d["Country Code"]})
 				.attr("cx", function(d, i) { return xy([+d.longitude,+d.latitude])[0]; })
 				.attr("cy", function(d, i) { return xy([+d.longitude,+d.latitude])[1]; })
-				.attr("r",  function(d) { return (Math.sqrt(d["2014"]))*scalefactor; })				
+				.attr("r",  function(d) { return (Math.sqrt(d[$("#slider").slider("value")]))*scalefactor; })				
 					.on("mouseover",function(d){
                 		d3.select(this).style("fill","#FC0");})
 					.on("mouseout", function(d){
@@ -177,6 +194,7 @@
 					clicked(d);
 					redrawbar(d, $("#slider").slider("value"));
 				});	 
+				labels.selectAll("text").remove();
 			labels.selectAll("labels")
 		      .data(gdp.val())
 		    .enter()
@@ -191,12 +209,77 @@
 					.attr("dy", "1em")
 			labels.selectAll("text")
 				.append("tspan")
-					.text(function(d) { return Math.round(d["2014"]/1000000); })
+					.text(function(d) { return Math.round(d[$("#slider").slider("value")]/1000000); })
 					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
 					.attr("dy", "1em")
 			bardraw(gdp.val(), $("#slider").slider("value"));
 		})
+		}
 		
+/////////////////
+		function DEBT(){
+			document.getElementById("debt").disabled = true;
+			document.getElementById("gdp").disabled = false;
+			geolist.on("value",function(snapshot){
+			var data = snapshot.val();
+			states.selectAll("path")
+				.data(data.features)
+			.enter().append("path")
+				.attr("d", path)
+				.on("mouseover", function(d) {
+						console.log(d);
+						tip.show(d);
+						d3.select(this).style("fill","#6C0");
+				})
+				.on("mouseout",function(d) {
+						tip.hide(d);
+						d3.select(this).style("fill","#F1EEE8");
+				})		
+			states.selectAll("path")
+				.attr("class",function(d) { return d["properties"]["name"]})
+		})
+		
+		stategdp.on("value",function(gdp){
+			var color = randomColor();
+			circles.selectAll("circle")
+				.data(gdp.val())
+			.enter()
+			.append("circle")
+				.attr("class",function(d) { return d["Country Code"]})
+				.attr("cx", function(d, i) { return xy([+d.longitude,+d.latitude])[0]; })
+				.attr("cy", function(d, i) { return xy([+d.longitude,+d.latitude])[1]; })
+				.attr("r",  function(d) { return (Math.sqrt(d[$("#slider").slider("value")]))*scalefactor; })				
+					.on("mouseover",function(d){
+                		d3.select(this).style("fill","#FC0");})
+					.on("mouseout", function(d){
+						d3.select(this).style("fill","steelblue");})
+				.on("click", function(d){
+					clicked(d);
+					redrawbar(d, $("#slider").slider("value"));
+				});	 
+				labels.selectAll("text").remove();
+			labels.selectAll("labels")
+		      .data(gdp.val())
+		    .enter()
+		    .append("text")
+		        .attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
+		        .attr("y", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[1]-15; })
+		        .attr("dy", "1em")
+		        .attr("text-anchor", "middle")
+				.append("tspan")
+					.text(function(d) { return d["Country Code"]})
+					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })		
+					.attr("dy", "1em")
+			labels.selectAll("text").select("tspan")
+				.append("tspan")
+					.text(function(d) { return Math.round(d[$("#slider").slider("value")]/1000000); })
+					.attr("x", function(d, i) { return xy([+d["longitude"],+d["latitude"]])[0]; })
+					.attr("dy", "1em")
+			bardraw(gdp.val(), $("#slider").slider("value"));
+		})
+		}
+
+
 		function clicked(d){
 			var x, y, k
 			q = xy("500","250")[0];
@@ -265,11 +348,15 @@
 				.attr("transform", "translate(" + q + "," + z + ")scale(" + k + ")translate(" + -x + "," + -y +  ")")		
 		}
 		function bardraw(d, year){
+			var dataset = [];
 			var bar =svgbar.attr("width", w).attr("height", d.length*20)
 					.selectAll("g")
 						.data(d)
 					.enter().append("g")
-						.attr("transform",function(d, i) { return "translate(0," + i *barHeight + ")"; })						
+						.attr("transform",function(d, i) { 
+							dataset.push(Math.round(d[year]/1000000));
+							return "translate(0," + i *barHeight + ")";
+						 })						
 			bar.append("rect")
 				.style("fill",randomColor)
 				.attr("width", function(d) { return Math.round(d[year]/50000000000);})
@@ -285,10 +372,10 @@
 				.attr("y", barHeight / 2)
 				.attr("dy", ".35em")
 				.text(function(d) { return Math.round(d[year]/1000000)+"("+d["Country Name"]+")"; })
-			bar.transition()
-				.duration(750)
+			sortbar(d,bar,dataset);
 		}
 		function redrawbar(d,year){
+			var dataset = [];
 			var range = d["Country Code"];
 				if (d&&centered===d.longitude) {
 				countrygdp.on("value",function(sectiongdp){
@@ -301,7 +388,9 @@
 						.selectAll("g")
 							.data(sectiongdp.val()[range])
 						.enter().append("g")
-							.attr("transform",function(d, i) { return "translate(0," + i *barHeight + ")"; })						
+							.attr("transform",function(d, i) { 
+								dataset.push(Math.round(d[year]/1000000));
+								return "translate(0," + i *barHeight + ")"; })						
 					bar.append("rect")
 						.style("fill",randomColor)
 							.attr("width", function(d) { return Math.round(d[year]/50000000000);})
@@ -319,7 +408,9 @@
 						.attr("y", barHeight / 2)
 						.attr("dy", ".35em")
 						.text(function(d) { return Math.round(d[year]/1000000)+"("+d["Country Name"]+")"; })
+					sortbar(sectiongdp.val()[range],bar,dataset);
 				});
+				
 			}
 			else{
 				svgbar.selectAll("g").remove();
@@ -329,6 +420,23 @@
 			}
 			
 		}
+		function sortbar(d,bar,dataset){
+			var index = d3.range(d.length);
+			var sortnum = d3.range(d.length);
+			index.sort(function(a, b) { 
+				return dataset[a] - dataset[b];
+			});
+			index.reverse();
+			sortnum.sort(function(a, b) { 
+				return index[a] - index[b];
+			});
+
+			console.log(Number(d.length))
+			bar.transition()				
+				.duration(750)
+				.delay(function(d, i) { return i * 50; })
+				.attr("transform", function(d, i) { return "translate(0," + sortnum[i]*barHeight + ")"; });
+		};
 		function redraw(year) {
 			circles.selectAll("circle")
 			.transition()
