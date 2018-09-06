@@ -6,3 +6,9 @@ index_firebase : the map ues geo Json File store in firebase(https://torrid-infe
 the continent data store in firebase(https://team7project2.firebaseio.com/)  
 with slide to select the year's gdp  
 and zooming
+
+
+＃ update 
+Link and data seems broken
+The project link is now [here](https://www.taiwanstat.com/global/l/gdp-debt/) which build in NCKU Netdb Lab
+
